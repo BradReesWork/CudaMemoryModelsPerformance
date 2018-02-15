@@ -26,7 +26,7 @@
 
 #include <cstdio>
 #include <cuda_runtime.h>
-#include <cusolverDn.h>
+#include <cufft.h>
 
 #ifdef __cplusplus
 #define LINKAGE "C"
@@ -51,12 +51,11 @@
     }                                                                        \
     }
 
-#define CHECK_CUSOLVER(call) {                                          	\
-    cusolverStatus_t err = call;                                            \
-    if( CUSOLVER_STATUS_SUCCESS != err) {                                   \
-        fprintf(stderr, "Cuda CUSolver error in file '%s' in line %i : %d\n",     \
-                __FILE__, __LINE__, err);             							\
-        exit(EXIT_FAILURE);                                                 \
+#define CHECK_FFT_STATUS(call) {                                             \
+    cufftResult err = call;                                                  \
+    if( err != CUFFT_SUCCESS) {                                             \
+        fprintf(stderr, "Cuda FFT error\n" );              					\
+        exit(EXIT_FAILURE);                                                  \
     } }
 
 
@@ -69,21 +68,12 @@ void init_cuda(int dev)
 	CHECK_CUDA(cudaSetDevice(dev));
     CHECK_CUDA(cudaGetDeviceProperties(&deviceProp, dev));
 
-	std::cout << "using device " << dev << " with CUDA compute mode of " << deviceProp.major << std::endl;
+	std::cout << "using device " << dev 				<< std::endl;
+	std::cout << "\tName       " << deviceProp.name		<< std::endl;
+	std::cout << "\tCompute    " << deviceProp.major << "." << deviceProp.minor << std::endl;
 }
 
-cusolverDnHandle_t  init_cusolver()
-{
-	cusolverDnHandle_t hanlde = NULL;
-	CHECK_CUSOLVER(cusolverDnCreate(&hanlde));
 
-	return hanlde;
-}
-
-cusolverStatus_t destroy_cusolver(cusolverDnHandle_t handle) {
-	cusolverStatus_t status =  cusolverDnCreate(&handle);
-	return status;
-}
 
 
 //-----------------------------------------------
