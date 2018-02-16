@@ -75,9 +75,6 @@ int main(int argc, char * argv[]) {
 	//			Initialize CUDA and Allocate memory
 	//-----------------------------------------------------------------------------------
 	cufftHandle		plan;
-	//Complex			*inDeviceMem;
-	//Complex			*outDeviceMem;
-
 	std::cout << "Allocating GPU Memory - nothing to allocate" << std::endl;
 
 	// create the FFT plan
@@ -146,11 +143,15 @@ int main(int argc, char * argv[]) {
 
 	std::cout << "Done (times in sec)"	<< std::endl;
 	std::cout << "\tReading Data = "  << dataReadTimer->getDurationSec() 	<< std::endl;
-	std::cout << "\tCopy To      = "  << copyToTimer->getDurationSec()  	<< std::endl;
+	//std::cout << "\tCopy To      = "  << copyToTimer->getDurationSec()  	<< std::endl;
 	std::cout << "\tExecute FFT  = "  << gpuExecTimer->getDurationSec()  	<< std::endl;
-	std::cout << "\tCopy From    = "  << copyFromTimer->getDurationSec()  	<< std::endl;
+	//std::cout << "\tCopy From    = "  << copyFromTimer->getDurationSec()  	<< std::endl;
 	std::cout << "\tSaving Data  = "  << dataSaveTimer->getDurationSec()  	<< std::endl;
 
+	//cudaFree(inDeviceMem);
+	//cudaFree(outDeviceMem);
+	free(inBuffer);
+	free(outBuffer);
 
 	delete args;
 	delete copyToTimer;

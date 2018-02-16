@@ -133,10 +133,11 @@ public:
 		std::cout << "Data Set Size   " << args->dataSizeGB 	<< " GB" << " or\t\t" 	<< args->dataSize << " bytes " << std::endl;
 		std::cout << "Buffer Size     " << args->bufferSizeGB 	<< " GB" <<	" or\t\t" 	<< args->buffSize << " bytes " << std::endl;
 		std::cout << "FFT Size        " << args->fftSize 		<< std::endl;
-		std::cout << "Buffer Elements " << args->buffElements 	<< std::endl;
 		std::cout << "Threads         " << args->threads 		<< std::endl;
 		std::cout << "Iterations      " << args->iter 			<< std::endl;
 		std::cout << "Records         " << args->records		<< std::endl;
+		std::cout << "Rec per Buffer  " << args->buffElements 	<< std::endl;
+
 	}
 
 

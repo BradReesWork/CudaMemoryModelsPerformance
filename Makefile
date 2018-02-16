@@ -34,7 +34,6 @@ CUDACFLAGS=-m64 -c -O3 --ptxas-options=-v
 CFLAGS=-std=c++11 -fopenmp -fPIC -DADD_ -fmax-errors=3 -W -Wall -c -O3 -I./include -I$(CUDA_HOME)/include
 
 LDFLAGS = \
-  	-L/opt/intel/lib/intel64 \
 	-lm -fopenmp\
 	-L$(CUDA_HOME)/lib64 -lcudart -lcufft
 	
@@ -44,18 +43,18 @@ OBJP= src/mainP.o
 OBJU= src/mainU.o
 
 H=  \
-	include/ArgParser.hpp \
-	include/CpuTimer.hpp \
-	include/CudaTimer.hpp \
+	include/ArgParser.hpp 
 
 
 all: cmpB cmpP cmpU cmpO
 
-cmpB: ${OBJB} Makefile ${H}
+cmpB: ${OBJB} Makefile ${H} 
 	${LD} -o cmpB ${OBJB} ${LDFLAGS}
+
 
 cmpP: ${OBJP} Makefile ${H}
 	${LD} -o cmpP ${OBJP} ${LDFLAGS}
+
 
 cmpU: ${OBJU} Makefile ${H}
 	${LD} -o cmpU ${OBJU} ${LDFLAGS}

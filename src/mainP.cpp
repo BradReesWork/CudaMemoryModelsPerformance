@@ -153,6 +153,10 @@ int main(int argc, char * argv[]) {
 	std::cout << "\tCopy From    = "  << copyFromTimer->getDurationSec()  	<< std::endl;
 	std::cout << "\tSaving Data  = "  << dataSaveTimer->getDurationSec()  	<< std::endl;
 
+	cudaFree(inDeviceMem);
+	cudaFree(outDeviceMem);
+	free(inBuffer);
+	free(outBuffer);
 
 	delete args;
 	delete copyToTimer;
