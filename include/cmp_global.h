@@ -36,7 +36,6 @@ std::normal_distribution<float> dist;
 void readComplex( Complex *data, const long arraySize, const long numToGet)
 {
 	long x;
-	float a, b;
 
 	if ( numToGet > arraySize ) {
 		std::cout << "ERROR !!!   numToGet is larger than arraySize " << numToGet << "  > " << arraySize << std::endl;
@@ -44,11 +43,8 @@ void readComplex( Complex *data, const long arraySize, const long numToGet)
 	}
 
 	for (x = 0 ; x < numToGet; x++) {
-
-		a = dist(eng);
-		b = dist(eng);
-		data[x].x = a;
-		data[x].y = b;
+		data[x].x = dist(eng);
+		data[x].y = dist(eng);
 	}
 
 	if (numToGet < arraySize) {

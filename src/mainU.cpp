@@ -25,9 +25,6 @@
 #include "cuda_global.h"
 
 #include "ArgParser.hpp"
-#include "CudaTimer.hpp"
-#include "CpuTimer.hpp"
-
 
 //-----------------------------------------------------------------
 /**
@@ -36,12 +33,6 @@
 int main(int argc, char * argv[]) {
 
 	std::cout << "Memory Model performance Test - UNIFIED" << std::endl;
-
-	CudaTimer	*copyToTimer 	= new CudaTimer();
-	CudaTimer	*copyFromTimer	= new CudaTimer();
-	CudaTimer	*gpuExecTimer	= new CudaTimer();
-	CpuTimer 	*dataReadTimer	= new CpuTimer();
-	CpuTimer 	*dataSaveTimer	= new CpuTimer();
 
 	//-----------------------------------------------------------------------------------
 	//			Parse the arguments and compute some variables, then print
@@ -88,27 +79,17 @@ int main(int argc, char * argv[]) {
 	long recProcessed = 0;
 	for ( int i = 0; i < iter; i++) {
 
-		dataReadTimer->start();
 		readComplex(inBuffer, numDataElements, numDataElements);
-		dataReadTimer->stop();
 
-		//copyToTimer->start();
 		//CHECK_CUDA(cudaMemcpy(inDeviceMem, inBuffer, (sizeof(Complex) * numDataElements), cudaMemcpyHostToDevice));
-		//copyToTimer->stop();
 
-		gpuExecTimer->start();
 		CHECK_FFT_STATUS( cufftExecC2C(plan, (cufftComplex *)inBuffer, (cufftComplex *)outBuffer, CUFFT_FORWARD) );
-		gpuExecTimer->stop();
 
-		//copyFromTimer->start();
 		//CHECK_CUDA(cudaMemcpy(outBuffer, outDeviceMem, (sizeof(Complex) * numDataElements), cudaMemcpyDeviceToHost));
-		//copyFromTimer->stop();
 
 		printValues(inBuffer, outBuffer, 3);
 
-		dataSaveTimer->start();
 		saveComplex(outBuffer, numDataElements);
-		dataSaveTimer->stop();
 
 		recProcessed += numDataElements;
 		std::cout << " \tProcessed " << recProcessed << " out of " << args->records << std::endl;
@@ -118,35 +99,18 @@ int main(int argc, char * argv[]) {
 		long leftToProcess = args->records - recProcessed;
 		std::cout << " \tProcessed the last " << leftToProcess << " out of " << args->records << std::endl;
 
-		dataReadTimer->start();
 		readComplex(inBuffer, numDataElements, leftToProcess);
-		dataReadTimer->stop();
 
-		//copyToTimer->start();
 		//CHECK_CUDA(cudaMemcpy(inDeviceMem, inBuffer, (sizeof(Complex) * numDataElements), cudaMemcpyHostToDevice));
-		//copyToTimer->stop();
 
-		gpuExecTimer->start();
 		CHECK_FFT_STATUS( cufftExecC2C(plan, (cufftComplex *)inBuffer, (cufftComplex *)outBuffer, CUFFT_FORWARD) );
-		gpuExecTimer->stop();
 
-		//copyFromTimer->start();
 		//CHECK_CUDA(cudaMemcpy(outBuffer, outDeviceMem, (sizeof(Complex) * numDataElements), cudaMemcpyDeviceToHost));
-		//copyFromTimer->stop();
 
-		dataSaveTimer->start();
 		saveComplex(outBuffer, numDataElements);
-		dataSaveTimer->stop();
 	}
 
-
-
-	std::cout << "Done (times in sec)"	<< std::endl;
-	std::cout << "\tReading Data = "  << dataReadTimer->getDurationSec() 	<< std::endl;
-	//std::cout << "\tCopy To      = "  << copyToTimer->getDurationSec()  	<< std::endl;
-	std::cout << "\tExecute FFT  = "  << gpuExecTimer->getDurationSec()  	<< std::endl;
-	//std::cout << "\tCopy From    = "  << copyFromTimer->getDurationSec()  	<< std::endl;
-	std::cout << "\tSaving Data  = "  << dataSaveTimer->getDurationSec()  	<< std::endl;
+	std::cout << "Done"	<< std::endl;
 
 	//cudaFree(inDeviceMem);
 	//cudaFree(outDeviceMem);
@@ -154,11 +118,6 @@ int main(int argc, char * argv[]) {
 	free(outBuffer);
 
 	delete args;
-	delete copyToTimer;
-	delete copyFromTimer;
-	delete gpuExecTimer;
-	delete dataReadTimer;
-	delete dataSaveTimer;
 
 	return 0;
 }
