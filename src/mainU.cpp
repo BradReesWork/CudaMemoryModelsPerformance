@@ -44,7 +44,7 @@ int main(int argc, char * argv[]) {
 	std::cout << "Num of CPUs     " << omp_get_num_procs() << std::endl;
     std::cout << "Max threads     " << omp_get_max_threads() << std::endl;
 
-	long numDataElements =	args->buffElements; 		// this is just for readability
+	long numBuffElements =	args->buffElements; 		// this is just for readability
 
 	// grab the cuda device
 	init_cuda(args->device);		// init will exit on error
@@ -58,8 +58,8 @@ int main(int argc, char * argv[]) {
 	Complex	*inBuffer;
 	Complex	*outBuffer;
 
-	CHECK_CUDA(cudaMallocManaged((void**)&inBuffer, (sizeof(Complex) * numDataElements) ));
-	CHECK_CUDA(cudaMallocManaged((void**)&outBuffer, (sizeof(Complex) * numDataElements) ));
+	CHECK_CUDA(cudaMallocManaged((void**)&inBuffer, (sizeof(Complex) * numBuffElements) ));
+	CHECK_CUDA(cudaMallocManaged((void**)&outBuffer, (sizeof(Complex) * numBuffElements) ));
 
 
 	//-----------------------------------------------------------------------------------
@@ -75,47 +75,37 @@ int main(int argc, char * argv[]) {
 	//-----------------------------------------------------------------------------------
 	//			Process
 	//-----------------------------------------------------------------------------------
-	int iter = args->iter;
-	long recProcessed = 0;
-	for ( int i = 0; i < iter; i++) {
+	long recProcessed 	= 0;
+	long recsToGet		= 0;
+	long leftToProcess 	= args->records;
 
-		readComplex(inBuffer, numDataElements, numDataElements);
+	while (leftToProcess > 0) {
 
-		//CHECK_CUDA(cudaMemcpy(inDeviceMem, inBuffer, (sizeof(Complex) * numDataElements), cudaMemcpyHostToDevice));
+		recsToGet = (leftToProcess > numBuffElements) ?  numBuffElements : leftToProcess;
+
+		getComplex(inBuffer, numBuffElements, recsToGet);
+
+		//CHECK_CUDA(cudaMemcpy(inDeviceMem, inBuffer, (sizeof(Complex) * numBuffElements), cudaMemcpyHostToDevice));
 
 		CHECK_FFT_STATUS( cufftExecC2C(plan, (cufftComplex *)inBuffer, (cufftComplex *)outBuffer, CUFFT_FORWARD) );
 
-		//CHECK_CUDA(cudaMemcpy(outBuffer, outDeviceMem, (sizeof(Complex) * numDataElements), cudaMemcpyDeviceToHost));
+		//CHECK_CUDA(cudaMemcpy(outBuffer, outDeviceMem, (sizeof(Complex) * numBuffElements), cudaMemcpyDeviceToHost));
 
-		printValues(inBuffer, outBuffer, 3);
+		//printValues(inBuffer, outBuffer, 3);
 
-		saveComplex(outBuffer, numDataElements);
+		clearComplex(outBuffer, numBuffElements);
 
-		recProcessed += numDataElements;
+		leftToProcess -= recsToGet;
+		recProcessed += recsToGet;
 		std::cout << " \tProcessed " << recProcessed << " out of " << args->records << std::endl;
 	}
 
-	if (recProcessed < args->records) {
-		long leftToProcess = args->records - recProcessed;
-		std::cout << " \tProcessed the last " << leftToProcess << " out of " << args->records << std::endl;
-
-		readComplex(inBuffer, numDataElements, leftToProcess);
-
-		//CHECK_CUDA(cudaMemcpy(inDeviceMem, inBuffer, (sizeof(Complex) * numDataElements), cudaMemcpyHostToDevice));
-
-		CHECK_FFT_STATUS( cufftExecC2C(plan, (cufftComplex *)inBuffer, (cufftComplex *)outBuffer, CUFFT_FORWARD) );
-
-		//CHECK_CUDA(cudaMemcpy(outBuffer, outDeviceMem, (sizeof(Complex) * numDataElements), cudaMemcpyDeviceToHost));
-
-		saveComplex(outBuffer, numDataElements);
-	}
 
 	std::cout << "Done"	<< std::endl;
 
-	//cudaFree(inDeviceMem);
-	//cudaFree(outDeviceMem);
-	free(inBuffer);
-	free(outBuffer);
+	cudaFree(inBuffer);
+	cudaFree(outBuffer);
+
 
 	delete args;
 

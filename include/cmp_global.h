@@ -24,27 +24,31 @@ typedef float2 Complex;
 
 
 // prototypes
-void readComplex( Complex *data, const long arraySize, const long numToGet);
-void saveComplex(Complex data[], long numToSave);
+void getComplex( Complex *data, const long arraySize, const long numToGet);
+void clearComplex(Complex data[], long numToSave);
 void printValues(Complex *inData, Complex *outData, int num);
 
-// global
-std::random_device rd{};
-std::mt19937 eng{rd()};
-std::normal_distribution<float> dist;
-
-void readComplex( Complex *data, const long arraySize, const long numToGet)
+void getComplex(Complex *data, const long arraySize, const long numToGet)
 {
 	long x;
+	float r;
+	const long p = arraySize / omp_get_max_threads();
+
+	std::random_device rd{};
+	std::mt19937 eng{rd()};
+	std::normal_distribution<float> dist;
+
 
 	if ( numToGet > arraySize ) {
 		std::cout << "ERROR !!!   numToGet is larger than arraySize " << numToGet << "  > " << arraySize << std::endl;
 		exit(-1);
 	}
 
+#pragma omp parallel for private(x,r, rd, eng, dist) schedule(static, p)
 	for (x = 0 ; x < numToGet; x++) {
-		data[x].x = dist(eng);
-		data[x].y = dist(eng);
+		r = dist(eng);
+		data[x].x = r;
+		data[x].y = r * 3;
 	}
 
 	if (numToGet < arraySize) {
@@ -56,9 +60,13 @@ void readComplex( Complex *data, const long arraySize, const long numToGet)
 }
 
 
-void saveComplex(Complex *data, long numToSave)
+void clearComplex(Complex *data, long numToSave)
 {
-	for (int idx = 0; idx < numToSave; idx++) {
+	long idx;
+	const long p = numToSave / omp_get_max_threads();
+
+	#pragma omp parallel for private(idx) schedule(static, p)
+	for (idx = 0; idx < numToSave; idx++) {
 		data[idx].x = 0;
 		data[idx].y = 0;
 	}

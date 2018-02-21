@@ -31,7 +31,7 @@ CUDACC=$(CUDA_HOME)/bin/nvcc -Xcompiler
 CUDA_ARCH=-arch=sm_70
 CUDACFLAGS=-m64 -c -O3 --ptxas-options=-v 
 
-CFLAGS=-std=c++11 -fopenmp -fPIC -DADD_ -fmax-errors=3 -W -Wall -c -O3 -I./include -I$(CUDA_HOME)/include
+CFLAGS=-std=c++11 -fopenmp -fPIC -DADD_ -fmax-errors=3 -W -Wall -c -O3 -ftree-vectorize -I./include -I$(CUDA_HOME)/include
 
 LDFLAGS = \
 	-lm -fopenmp\
@@ -42,24 +42,41 @@ OBJB= src/mainB.o
 OBJP= src/mainP.o
 OBJU= src/mainU.o
 
+OBJB2= src/mainB2.o
+OBJP2= src/mainP2.o
+OBJU2= src/mainU2.o
+
+OBJCPU= src/mainU2.o
+
+
 H=  \
 	include/ArgParser.hpp 
 
 
-all: cmpB cmpP cmpU cmpO
+all: cmpB cmpP cmpU cmpB2 cmpP2 cmpU2 cmpCpu
 
 cmpB: ${OBJB} Makefile ${H} 
-	${LD} -o cmpB ${OBJB} ${LDFLAGS}
-
+	${LD} -o bin/cmpB ${OBJB} ${LDFLAGS}
 
 cmpP: ${OBJP} Makefile ${H}
-	${LD} -o cmpP ${OBJP} ${LDFLAGS}
-
+	${LD} -o bin/cmpP ${OBJP} ${LDFLAGS}
 
 cmpU: ${OBJU} Makefile ${H}
-	${LD} -o cmpU ${OBJU} ${LDFLAGS}
+	${LD} -o bin/cmpU ${OBJU} ${LDFLAGS}
 
-			
+
+cmpB2: ${OBJB2} Makefile ${H} 
+	${LD} -o bin/cmpB2 ${OBJB2} ${LDFLAGS}
+
+cmpP2: ${OBJP2} Makefile ${H}
+	${LD} -o bin/cmpP2 ${OBJP2} ${LDFLAGS}
+
+cmpU2: ${OBJU2} Makefile ${H}
+	${LD} -o bin/cmpU2 ${OBJU2} ${LDFLAGS}
+	
+cmpCpu: ${OBJCPU} Makefile ${H}
+	${LD} -o bin/cmpCpu ${OBJCPU} ${LDFLAGS}	
+				
 %.o: %.cpp Makefile
 	$(CPP) $(CFLAGS) $< -o $@
 
@@ -67,4 +84,4 @@ cmpU: ${OBJU} Makefile ${H}
 #	$(CUDACC) $(CUDACFLAGS) $(CUDA_ARCH) $<
 
 clean:
-	rm -rf src/*.o cmp*
+	rm -rf src/*.o bin/cmp*
