@@ -88,6 +88,8 @@ int main(int argc, char * argv[]) {
 		//CHECK_CUDA(cudaMemcpy(inDeviceMem, inBuffer, (sizeof(Complex) * numBuffElements), cudaMemcpyHostToDevice));
 
 		CHECK_FFT_STATUS( cufftExecC2C(plan, (cufftComplex *)inBuffer, (cufftComplex *)outBuffer, CUFFT_FORWARD) );
+		cudaDeviceSynchronize();
+
 
 		//CHECK_CUDA(cudaMemcpy(outBuffer, outDeviceMem, (sizeof(Complex) * numBuffElements), cudaMemcpyDeviceToHost));
 
