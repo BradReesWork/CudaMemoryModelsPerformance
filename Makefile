@@ -45,6 +45,7 @@ OBJU= src/mainU.o
 OBJB2= src/mainB2.o
 OBJP2= src/mainP2.o
 OBJU2= src/mainU2.o
+OBJMK= src/mainMakeData.o
 
 OBJCPU= src/mainU2.o
 
@@ -53,7 +54,7 @@ H=  \
 	include/ArgParser.hpp 
 
 
-all: cmpB cmpP cmpU cmpB2 cmpP2 cmpU2 cmpCpu
+all: cmpB cmpP cmpU cmpB2 cmpP2 cmpU2 cmpCpu makeData
 
 cmpB: ${OBJB} Makefile ${H} 
 	${LD} -o bin/cmpB ${OBJB} ${LDFLAGS}
@@ -76,7 +77,10 @@ cmpU2: ${OBJU2} Makefile ${H}
 	
 cmpCpu: ${OBJCPU} Makefile ${H}
 	${LD} -o bin/cmpCpu ${OBJCPU} ${LDFLAGS}	
-				
+
+makeData: ${OBJMK} Makefile ${H}
+	${LD} -o bin/makeData ${OBJMK} ${LDFLAGS}	
+					
 %.o: %.cpp Makefile
 	$(CPP) $(CFLAGS) $< -o $@
 
